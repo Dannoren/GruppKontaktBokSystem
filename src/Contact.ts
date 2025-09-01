@@ -1,4 +1,4 @@
-// Unika identifierare och namn
+// Unique id and names
 export type ContactID = string;
 export type ContactName = string;
 export type CompanyName = string;

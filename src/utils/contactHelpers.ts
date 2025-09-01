@@ -15,7 +15,7 @@ export function findContactByName(name: string): Contact | undefined {
   );
 }
 
-//Console Log all information
+//Console Log all interface types
 export function listContacts(): void {
   contacts.forEach((c) => {
     // Name
