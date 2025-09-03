@@ -1,13 +1,15 @@
 import { Contact } from "../Contact";
 
+// In-memory array to store all contacts
 const contacts: Contact[] = [];
 
-// Add Contact
+// Add a new contact to the contacts list
 export function addContact(contact: Contact): void {
   contacts.push(contact);
 }
 
-// Find Contact
+// Find a contact by its name
+// Returns the contact if found, otherwise returns undefined
 export function findContactByName(name: string): Contact | undefined {
   return contacts.find(
     (c) =>
@@ -15,31 +17,33 @@ export function findContactByName(name: string): Contact | undefined {
   );
 }
 
-//Console Log all interface types
+// Print all contact details to the console
 export function listContacts(): void {
   contacts.forEach((c) => {
-    // Name
-    console.log(`👤 Person: ${c.name} `)
+    // Print name
+    console.log(`👤 Person: ${c.name} `);
 
-    //Company
-    console.log(`🏢 Company: ${c.companyName}`)
+    // Print company name
+    console.log(`🏢 Company: ${c.companyName}`);
    
-    // Emails
+    // Print all emails
     c.emails.forEach((e) => {
-      console.log(`📧 ${e.type} Email: ${e.eaddress}`)
+      console.log(`📧 ${e.type} Email: ${e.eaddress}`);
     });
 
-    // Phones
+    // Print all phone numbers (if available)
     c.phones?.forEach((p) => {
-      console.log(`📱 ${p.type} Number: ${p.number}`)
+      console.log(`📱 ${p.type} Number: ${p.number}`);
     }); 
 
-    // Address
+    // Print all addresses (if available)
     c.address?.forEach((a) => {
       console.log(
-        `🏠 Street: ${a.street}, Postal Code: ${a.postalCode}, City: ${a.city}, Country: ${a.country}`)
+        `🏠 Street: ${a.street}, Postal Code: ${a.postalCode}, City: ${a.city}, Country: ${a.country}`
+      );
     });
 
-    console.log("------")
+    // Separator for better readability
+    console.log("------");
   });
 }
