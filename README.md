@@ -1,171 +1,108 @@
-# Förståelse och Användning av Interfaces och Types i TypeScript
+# A. Introduktion 
 
-Detta dokument ger en introduktion till `interfaces` och `types` i TypeScript, vanliga fel, praktiska exempel från ett kontaktboksprogram samt en övningsuppgift.
+I TypeScript används interfaces och types för att beskriva strukturen på data och skapa tydligare, säkrare kod. De hjälper utvecklare att definiera vilka fält och metoder som ska finnas i ett objekt, och gör det lättare att upptäcka fel redan vid kompilering istället för under körning.
+Interface används ofta för att beskriva formen på objekt, särskilt när flera delar av programmet ska följa samma struktur.
 
-## A. Introduktion
+Type alias används för att ge namn åt vilken typ som helst – inte bara objekt – till exempel unionstyper, primitiva typer eller mer komplexa kombinationer.
 
-### Förklara konceptet på ett begripligt sätt
+## Varför använder man interfaces och types?
 
-I TypeScript används `interfaces` och `types` för att beskriva strukturen på data och skapa tydligare, säkrare kod. De hjälper utvecklare att definiera vilka fält och metoder som ska finnas i ett objekt, och gör det lättare att upptäcka fel redan vid kompilering istället för under körning.
-
--   **Interface** används ofta för att beskriva formen på objekt, särskilt när flera delar av programmet ska följa samma struktur.
--   **Type alias** används för att ge namn åt vilken typ som helst – inte bara objekt – till exempel unionstyper, primitiva typer eller mer komplexa kombinationer.
-
-### Varför använder man interfaces och types?
-
-#### För att strukturera data
-Om du har en kontaktbok kan du skapa ett `Contact`-interface:
-
-```typescript
-interface Contact {
+För att strukturera data
+ Om du har en kontaktbok kan du skapa ett Contact-interface:
+```
+ interface Contact {
   id: string;
   name: string;
   email: string;
 }
+```
+ Nu vet TypeScript att varje Contact-objekt måste ha dessa fält.
 
-Nu vet TypeScript att varje Contact-objekt måste ha dessa fält.
 
 För att skapa flexibla typer
-
-Med type kan du kombinera olika alternativ:
-TypeScript
-
-type ContactMethod = "email" | "phone" | "sms";
-
+ Med type kan du kombinera olika alternativ:
+```
+ type ContactMethod = "email" | "phone" | "sms";
+```
 Här blir ContactMethod en unionstyp som bara tillåter tre specifika strängvärden.
-
 För att återanvända och dela kontrakt mellan delar av koden
-
 Om flera funktioner behöver hantera en User, kan ett interface eller type definiera exakt vad en User är – och TypeScript varnar om något saknas eller är fel.
 
-B. Vanliga fel och felsökning
+# B. Vanliga fel och felsökning
 
-Här är några vanliga fel som nybörjare gör, tillsammans med felmeddelanden och lösningar.
+### 1. Man kan skriva ner fel primitiv datatyp på vissa fält
+Felmeddelande: TS2322: Type 'number' is not assignable to type 'string'.
+Lösning: Lösningen är att antingen konvertera värdet till rätt typ, ändra deklarationen av variabeln, eller tillåta en union beroende på vad du vill uppnå.
 
-1. Fel primitiv datatyp på vissa fält
-
-Man råkar tilldela ett värde av fel typ till ett fält.
-
-Felmeddelande:
-TS2322: Type 'number' is not assignable to type 'string'.
-
-Lösning:
-Lösningen är att antingen konvertera värdet till rätt typ, ändra deklarationen av variabeln, eller tillåta en union beroende på vad du vill uppnå.
-
-2. Förväxling av type och interface (t.ex. extends på ett type)
-
-interface används främst för att beskriva objektstrukturer och klasser, medan type alias kan användas för allt: unioner, primitiva typer, funktionstyper m.m. Det är vanligt att felaktigt försöka utöka ett type med extends.
-
-Exempel på fel:
-TypeScript
-
+### 2. Det är lätt att förväxla Type och interface. Som till exempel när man använder extends på ett Type. 
+interface används främst för att beskriva objektstrukturer och klasser medan type alias kan användas för allt: unioner, primitive types och function types m.m.
+exempel på fel på extends:
+```
 type Person = {
   id: string;
   name: string;
 };
+// Försöker felaktigt använda 'extends' på ett type alias:
 
-// Försöker felaktigt använda 'extends' på ett type alias
 interface Employee extends Person {
   role: string;
 }
+```
+Felmeddelande: TS2312: An interface can only extend an object type or intersection of object types with statically known members.
+Lösning: Vill du använda extends ➝ byt type till interface.
+Vill du stanna kvar i type ➝ använd & (intersection) istället.
 
-Felmeddelande:
-TS2312: An interface can only extend an object type or intersection of object types with statically known members.
+### 3. optional vs undefined. Ett ? bakom till exempel name? betyder att property kan vara saknad eller undefined, vilket kan orsaka buggar om man inte kontrollerar värdet ordentligt.
 
-Lösning:
-
-    Alternativ 1: Om du vill använda extends, ändra Person från type till interface.
-
-    Alternativ 2: Om du vill fortsätta använda type, använd en intersection (&) för att kombinera typerna:
-    TypeScript
-
-    type Employee = Person & {
-      role: string;
-    };
-
-3. Förvirring mellan optional (?) och undefined
-
-Ett ? efter ett fältnamn (t.ex. name?: string) betyder att egenskapen kan vara helt utelämnad eller ha värdet undefined. Det kan orsaka buggar om man inte hanterar detta korrekt och till exempel försöker tilldela null.
-
-Exempel på fel:
-TypeScript
-
+Här har vi ett felmeddelande med optional:
+```
 interface Person {
   id: number;
   name?: string;
 }
-
 const p: Person = { id: 1, name: null };
+```
+Felmeddelande: Type 'null' is not assignable to type 'string | undefined'
 
-Felmeddelande:
-Type 'null' is not assignable to type 'string | undefined'.
+Lösning: Det finns några lösningar på detta problem, en lösning är att man använder sig av undefined istället för null. Man skulle även kunna låta bli att sätta name i 
+const p: Person = { id: 1, name: null }; eftersom vi har satt optional på name med ett ? bakom.
 
-Lösning:
+# C. Ert kompletta program
 
-    Lösning 1: Använd undefined istället för null.
+I vårt projekt används både interface och type för att strukturera och göra koden mer strukturerad, säkrare, läsbar och flexibel.
 
-    Lösning 2: Utelämna fältet name helt från objektet, eftersom det är valfritt.
-    TypeScript
-
-const p: Person = { id: 1 }; // Helt korrekt!
-
-Lösning 3: Om null måste tillåtas, lägg till det i typdefinitionen:
-TypeScript
-
-    interface Person {
-      id: number;
-      name?: string | null;
-    }
-
-C. Vårt kompletta program
-
-Presentera programmet med tydliga kommentarer
-
-I vårt projekt används både interface och type för att strukturera och göra koden mer säker, läsbar och flexibel.
-
-Type alias för läsbarhet
-
-Vi använder type alias för att ge mer beskrivande namn till primitiva typer:
-TypeScript
-
+### Vi använder type alias för att mer läsbar och lättare att förstå:
+```
 export type ContactID = string;
 export type ContactName = string;
 export type CompanyName = string;
+```
 
-Union Type för begränsade val
-
-Vi använder en union type för att säkerställa att endast specifika värden tillåts för ett fält:
-TypeScript
-
+### Vi använder Union Type för att göra det mer tydligt om vad för datatyper som ska finnas inom fältet: 
+```
 export type PhoneNumberType = 'Mobile' | 'Home' | 'Work' | 'Other';
+```
+Här kan man se att PhoneNumberType ska bara vara mellan  'Mobile',  'Home',  'Work' eller 'Other’. 
 
-Här kan PhoneNumberType bara vara en av de fyra specificerade strängarna.
-
-Interface för att definiera datastruktur
-
-Vi använder ett interface för att definiera den exakta strukturen för ett Contact-objekt:
-TypeScript
-
-// Beskriver strukturen för en kontaktperson
-export interface Contact {
-  readonly id: ContactID;   // Unikt ID som inte kan ändras
-  name: ContactName;        // Fullständigt namn
-  emails: Email[];          // En lista med e-postadresser
-  phones?: PhoneNumber[];   // Valfri lista med telefonnummer
-  address?: Address[];      // Valfri lista med adresser
-  companyName: CompanyName; // Företaget kontakten är associerad med
+### Vi använder interface Contact för att definiera hur en kontakt ska se ut:
+```
+interface Contact {
+  readonly id: ContactID;
+  name: ContactName;
+  emails: Email[];
+  phones?: PhoneNumber[]; // valfritt fält
+  address?: Address[]; // valfritt fält
+  companyName: CompanyName;
 }
+```
 
-Detta säkerställer att alla funktioner som hanterar kontakter vet exakt vilka fält som finns. TypeScript kommer att varna om man försöker skapa en kontakt utan name eller emails.
-
-Exempel på en kontakt:
-TypeScript
-
+### Här är ett exempel på hur man kan fylla ut interface Contact:
+```
 const anna: Contact = {
-  id: "1", // Unikt ID
-  name: "Anna Andersson",
-  emails: [{ type: "Personal", eaddress: "Anna@example.com" }],
-  phones: [{ type: "Mobile", number: "070-1234567" }],
+  id: "1", // Unique contact ID
+  name: "Anna Andersson", 
+  emails: [{ type: "Personal", eaddress: "Anna@example.com" }], 
+  phones: [{ type: "Mobile", number: "070-1234567" }], 
   address: [
     {
       street: "Lottavägen 10",
@@ -173,60 +110,64 @@ const anna: Contact = {
       city: "Nuerdetmellis",
       country: "Sweden",
     },
-  ],
-  companyName: "ACME Corp",
+  ], // Full address information
+  companyName: "ACME Corp", // Associated company
 };
+```
 
-Valfria fält (?)
-Fälten phones? och address? är valfria. Det innebär att en kontakt kan skapas utan dem, vilket gör vår datamodell mer flexibel.
+Detta gör att alla funktioner som jobbar med kontakter vet exakt vilka fält som finns. Om man försöker skapa en kontakt utan name eller email, får man ett TypeScript-fel.
 
-Inkludera instruktioner för hur man kör programmet
+### Valfria fält (?)
+```
+export interface Contact {
+  readonly id: ContactID;   // Unique ID, cannot be changed once assigned
+  name: ContactName;        // Full name of the contact
+  emails: Email[];          // A list of associated email addresses
+  phones?: PhoneNumber[];   // Optional list of phone numbers
+  address?: Address[];      // Optional list of addresses
+  companyName: CompanyName; // Company associated with the contact
+}
+```
+Här syns fördelen med phones? och address? – de behöver inte finnas på alla kontakter.
 
-    Kompilera TypeScript: Öppna kommandotolken i Visual Studio Code och kör följande kommando för att omvandla TypeScript-koden till JavaScript.
-    Bash
+## Instruktioner för hur man kör programmet:
 
-npx tsc
+### 1. Börja med att kompilera Typescript genom att köra npx tsc i kommandotolken i visual studio.
 
-Kör programmet: Använd Node.js för att exekvera den kompilerade koden. Programmet kommer att starta och skriva ut alla kontakter i konsolen.
-Bash
+### 2. Sedan ska du köra programmet med Node.js, för att göra det skriver du in node dist/index.js i kommandotolken i Visual Studio. När du skriver det så kommer programmet att starta och skriva ut alla kontakter i konsolen. 
 
-node dist/index.js
+### 3. Skapa en egen contact genom att följa denna templet: 
+``` 
+const anna ( förnamnet på kontaktpersonen ska vara här ): Contact = {
+  id: "1", // Här ska du skriva in det näst högsta id nummer
+  name: "Anna Andersson", // Här skriver du för och efternamn på personen
+  emails: [{ type: "Work" // Här ska du skriva ner vilken typ av email denna e-postadress är (du kan välja mellan Personal, Work eller Other. Glöm inte stor bokstav på första bokstaven), eaddress: "Anna@example.com" //Här skriver du in e-postadressen }], 
+  phones: [{ type: "Mobile" // Här ska du skriva ner vilken typ av telefonnummer som detta nummer är (du kan välja mellan Mobile, Work, Home eller Other. Glöm inte stor bokstav på första bokstaven), number: "070-1234567" //Här skriver du ner telefonnumret}], 
+  address: [
+    {
+      street: "Lottavägen 10", // Här skriver du vilken gata som personen bor på
+      postalCode: "00707", // Här skriver du vad för postnummer de har
+      city: "Nuerdetmellis", // Här skriver du vilken stad som personen bor i
+      country: "Sweden", // Här skriver du vilken land personen kommer från
+    },
+  ], // Full address information
+  companyName: "ACME Corp", // Här skriver du ner vilken företag som personen jobbar på
+}; 
+```
 
-Skapa en egen kontakt: Följ mallen nedan för att lägga till en ny kontakt i koden.
-TypeScript
+# D. Övningsuppgift
 
-    const dinKontakt: Contact = {
-      id: "2", // Här ska du skriva in det näst högsta id-numret
-      name: "Ditt Namn", // Här skriver du för- och efternamn
-      emails: [{ type: "Work", eaddress: "din.email@example.com" }], // Typ: 'Personal', 'Work' eller 'Other'
-      phones: [{ type: "Mobile", number: "070-9876543" }], // Typ: 'Mobile', 'Work', 'Home' eller 'Other'
-      address: [
-        {
-          street: "Din Gata 1", // Här skriver du vilken gata som personen bor på
-          postalCode: "12345", // Här skriver du vad för postnummer de har
-          city: "Din Stad", // Här skriver du vilken stad som personen bor i
-          country: "Sweden", // Här skriver du vilket land personen kommer från
-        },
-      ],
-      companyName: "Ditt Företag", // Här skriver du ner vilket företag som personen jobbar på
-    };
+Ni ska ska lägga till en funktion för att räkna antalet kontakter. 
 
-D. Övningsuppgift
+instruktion:
+ Skapa en funktion som returnerar hur många kontakter som finns i listan just nu. 
+här kommer ett exempel på funktionens signatur: export function countContacts(): number
 
-Utöka eller modifiera programmet
+ledtrådar: 
+1. Du har redan en array som heter contacts. 
+2. kom ihåg att en array har en property som berättar hur många element den innehåller 
+3. testa gärna funktionen med en console.log
 
-Din uppgift är att lägga till en funktion som räknar det totala antalet kontakter som finns i systemet.
 
-Instruktion:
-Skapa en funktion som returnerar hur många kontakter som finns i listan just nu. Här är funktionens signatur som du ska implementera:
-TypeScript
 
-export function countContacts(): number
 
-Ledtrådar:
-
-    Du har redan en array som heter contacts.
-
-    Kom ihåg att en array har en inbyggd egenskap (property) som berättar hur många element den innehåller.
-
-    Testa gärna din funktion genom att anropa den och skriva ut resultatet med console.log.
